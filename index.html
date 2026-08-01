@@ -444,7 +444,7 @@
         icon: 'star', symbol:'✦', tagline: 'Blue Signal ♥',
         badge: 'Harumasa Pulse', badgeIcon: 'star', accent:'#3f86d8', accentSoft:'#f1cd5f', decorAsset:'halo.png',
         rewards: [
-          { iconKey: 'star', title: 'Voice Recording', subtitle: '2min' },
+          { iconKey: 'star', title: 'Custom Voice Letter', subtitle: '2min' },
           { iconKey: 'coffee', title: '30 Min Call', subtitle: '30min' },
           { iconKey: 'moon', title: 'Watch Together', subtitle: '30min' },
           { iconKey: 'heart', title: 'Another Serving', subtitle: '' },
@@ -465,7 +465,7 @@
           { iconKey: 'moon', title: 'Game Session', subtitle: '30min' },
           { iconKey: 'coffee', title: 'Another Serving', subtitle: '' },
           { iconKey: 'crown', title: 'With Me', subtitle: '45min' },
-          { iconKey: 'star', title: 'Voice Recording', subtitle: '2min' },
+          { iconKey: 'star', title: 'Custom Voice Letter', subtitle: '2min' },
           { iconKey: 'heart', title: '20% Coupon', subtitle: '' },
           { iconKey: 'coffee', title: 'Another Serving', subtitle: '' }
         ]
@@ -476,12 +476,12 @@
         icon: 'rose', symbol:'🌹', tagline: 'Take Your Chance ♥',
         badge: 'Velvet Rose', badgeIcon: 'rose', accent:'#7a1620', accentSoft:'#d9a656', decorAsset:'rose.png',
         rewards: [
-          { iconKey: 'rose', title: 'Voice Recording', subtitle: '2min' },
-          { iconKey: 'coffee', title: '30 Min Call', subtitle: '30min' },
-          { iconKey: 'moon', title: 'Watch Together', subtitle: '30min' },
+          { iconKey: 'rose', title: 'Custom Voice Letter', subtitle: '30s' },
+          { iconKey: 'coffee', title: 'Game Session', subtitle: '15min' },
+          { iconKey: 'moon', title: 'Watch Together', subtitle: '15min' },
           { iconKey: 'heart', title: 'Another Serving', subtitle: '' },
-          { iconKey: 'crown', title: 'Custom Voice Letter', subtitle: '1min' },
-          { iconKey: 'thread', title: 'Game Session', subtitle: '30min' },
+          { iconKey: 'crown', title: 'With Me', subtitle: '30min' },
+          { iconKey: 'thread', title: 'Chat', subtitle: '15min' },
           { iconKey: 'star', title: 'Coupon', subtitle: '20%' },
           { iconKey: 'heart', title: 'Another Serving', subtitle: '' }
         ]
@@ -497,7 +497,7 @@
           { iconKey: 'moon', title: 'Watch Together', subtitle: '1h' },
           { iconKey: 'heart', title: 'Another Serving', subtitle: '' },
           { iconKey: 'crown', title: 'Custom Voice Letter', subtitle: '1min' },
-          { iconKey: 'coffee', title: 'Voice Recording', subtitle: '3min' },
+          { iconKey: 'coffee', title: 'Custom Voice Letter', subtitle: '3min' },
           { iconKey: 'star', title: 'Coupon', subtitle: '20%' },
           { iconKey: 'heart', title: 'Another Serving', subtitle: '' }
         ]
@@ -536,6 +536,16 @@
     function activeHost(){ return HOSTS.find(h => h.key === activeHostKey); }
     function activeRewards(){ return activeHost().rewards || DEFAULT_REWARDS; }
     function rewardLabel(reward){ return reward.subtitle ? `${reward.title} ${reward.subtitle}` : reward.title; }
+    function pickWeightedRewardIndex(rewards){
+      const weights = rewards.map(reward => reward.title === 'Another Serving' ? 0.35 : 1);
+      const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+      let roll = Math.random() * totalWeight;
+      for(let i = 0; i < rewards.length; i++){
+        roll -= weights[i];
+        if(roll < 0) return i;
+      }
+      return rewards.length - 1;
+    }
     function hexToRgb(hex){ const clean = (hex || '').replace('#',''); const full = clean.length === 3 ? clean.split('').map(ch => ch + ch).join('') : clean; const int = parseInt(full, 16); return `${(int >> 16) & 255},${(int >> 8) & 255},${int & 255}`; }
     function iconSvg(iconKey, color = 'currentColor'){
       if(iconKey === 'rose-img'){
@@ -923,7 +933,7 @@
 
       const rewards = activeRewards();
       const segment = 360 / rewards.length;
-      const chosenIndex = Math.floor(Math.random() * rewards.length);
+      const chosenIndex = pickWeightedRewardIndex(rewards);
       const sliceCenter = chosenIndex * segment;
       const stopAt = 360 - sliceCenter;
       const fullSpins = 360 * (6 + Math.floor(Math.random() * 3));
